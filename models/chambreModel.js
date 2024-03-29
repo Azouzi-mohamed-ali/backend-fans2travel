@@ -1,11 +1,8 @@
-
-// models/chambreModel.js
 const mongoose = require('mongoose');
 
 const chambreSchema = new mongoose.Schema({
   numchambre: { type: Number, required: true, unique: true },
-  // Référence à l'Hotel
-  nomhotel: { type: mongoose.Schema.Types.ObjectId, ref: 'Hotel', required: true },
+  nomhotel: { type: String, ref: 'Hotel',required: true,  },
   description: { type: String, required: true, maxlength: 250 },
   prixnuite: { type: Number, required: true },
   nbrenfant: { type: Number, required: true },

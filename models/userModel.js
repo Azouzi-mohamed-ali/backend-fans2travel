@@ -14,7 +14,11 @@ const userSchema = new mongoose.Schema({
   tel: { type: Number },
   datenais: { type: Date },
   sexe: { type: String, required: false, maxlength: 50, enum: ['Mr', 'Mm', 'Mle', 'Autre'] },
-  photo: { type: String, maxlength: 250 },
+  image: { type: String   },
+  publicId:{ 
+    type : String
+  },
+
   role: { type: String, maxlength: 50, enum: ['user', 'super admin', 'admin'], default: 'user' }, // Ajout de la valeur par défaut
   token: { type: String },
 

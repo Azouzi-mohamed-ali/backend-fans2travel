@@ -5,7 +5,7 @@ const router = express.Router();
 const chambreController = require('../controllers/chambreController');
 
 // Route pour obtenir tous les chambres
-router.get('/chambres', chambreController.getAllChambres);
+router.get('/chambres',  chambreController.getAllChambres);
 
 // Route pour obtenir une chambre par son ID
 router.get('/chambres/:id', chambreController.getChambreById);

@@ -7,8 +7,6 @@ const favorieSchema = new mongoose.Schema({
   cin:{ type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
   type: { type: String, maxlength: 50, enum: ['Hotel', 'Promo', 'Voyage'] }
 
-
-
 });
 
 const Favorie = mongoose.model('Favorie', favorieSchema);
