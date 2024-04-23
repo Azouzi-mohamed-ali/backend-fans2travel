@@ -61,13 +61,23 @@ exports.createUser = async (req, res) => {
   } catch (error) {
     res.status(400).json({ success: false, msg: 'Une erreur s\'est produite lors de la création de l\'utilisateur', status: 400, error: error.message });
   }
+  
 };
 
 // updateUser
 exports.updateUser = async (req, res) => {
   const userId = req.params.id;
   try {
-    const updatedUser = await User.findByIdAndUpdate(userId, req.body, { new: true });
+    let updatedUserData = req.body;
+
+    // Vérifier si une image est téléchargée
+    if (req.file) {
+      // Upload Image to Cloudinary
+      const data = await uploadToCloudinary(req.file.path, "f2t");
+      updatedUserData.image = data.url;
+    }
+
+    const updatedUser = await User.findByIdAndUpdate(userId, updatedUserData, { new: true });
     if (!updatedUser) {
       return res.status(404).json({ success: false, msg: 'Utilisateur non trouvé', status: 404 });
     }
@@ -76,6 +86,7 @@ exports.updateUser = async (req, res) => {
     res.status(400).json({ success: false, msg: 'Une erreur s\'est produite lors de la mise à jour de l\'utilisateur', status: 400, error: error.message });
   }
 };
+
 
 // deleteUser
 exports.deleteUser = async (req, res) => {
@@ -255,22 +266,45 @@ exports.uploadUserImage = async (req, res) => {
     // Upload Image to Cloudinary
     const data = await uploadToCloudinary(req.file.path, "f2t");
 
-    // Save Image Url and publicId to the database
+    // Save Image Url to the database
     const savedImg = await User.updateOne(
       { _id: req.params.id },
-      {
-        $set: {
-          image: data.url,
-          publicId: data.public_id,
-        }
-      }
+      { $set: { image: data.url } }
     );
-
-    res.status(200).send("User image uploaded successfully!");
+    return res.status(404).json({ success: true, msg: 'User image uploaded successfully!', status: 200});
   } catch (error) {
     console.error(error);
-    return res.status(500).json({ success: false, msg: "Une erreur s'est produite lors de la réinitialisation du mot de passe.", status: 500, error: error.message });
+    return res.status(500).json({ success: false, msg: "User image uploaded failed!", status: 500, error: error.message });
 
   }
 };
-  
+
+// Delete User Image
+exports.deleteUserImage = async (req, res) => {
+  try {
+    // Find User by ID
+    const user = await User.findById(req.params.id);
+
+    if (!user) {
+      return res.status(404).json({ success: false, msg: 'Utilisateur non trouvé', status: 404 });
+    }
+
+    // Check if user has an image
+    if (!user.image) {
+      return res.status(404).json({ success: false, msg: 'Aucune image trouvée pour cet utilisateur', status: 404 });
+    }
+
+    // Delete Image from Cloudinary
+    await cloudinary.uploader.destroy(user.image); // Supprimer l'image en utilisant l'URL de l'image directement
+
+    // Remove Image URL from the database
+    user.image = '';
+    await user.save();
+
+    res.status(200).json({ success: true, msg: 'Image utilisateur supprimée avec succès', status: 200 });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ success: false, msg: 'Une erreur s\'est produite lors de la suppression de l\'image utilisateur', status: 500, error: error.message });
+  }
+};
+

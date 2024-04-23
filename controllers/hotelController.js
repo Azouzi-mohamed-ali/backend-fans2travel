@@ -2,6 +2,10 @@
 const Hotel = require('../models/hotelModel');
 const Chambre = require('../models/chambreModel');
 const Service = require('../models/serviceModel');
+const { cloudinary } = require('../config/cloudinary');
+// Importer multer pour gérer les fichiers
+const multer = require('multer');
+
 
 // Fonction pour récupérer les chambres avec leurs numéros associées à un hôtel
 async function getChambresInHotel(nomHotel) {
@@ -120,13 +124,21 @@ exports.createHotel = async (req, res) => {
 };
 
 
-// updateHotel
+/// updateHotel
 exports.updateHotel = async (req, res) => {
   const hotelId = req.params.id;
   const newHotelName = req.body.nomhotel; // Nouveau nom de l'hôtel
 
   try {
-    const updatedHotel = await Hotel.findByIdAndUpdate(hotelId, req.body, { new: true });
+    const updates = req.body; // Récupérer les mises à jour du corps de la requête
+
+    // Vérifier si une image est téléchargée
+    if (req.file) {
+      const data = await uploadToCloudinary(req.file.path, "f2t"); // Upload de la nouvelle image
+      updates.images = data.url; // Ajouter l'URL de la nouvelle image aux mises à jour
+    }
+
+    const updatedHotel = await Hotel.findByIdAndUpdate(hotelId, updates, { new: true });
     if (!updatedHotel) {
       return res.status(404).json({ success: false, msg: 'Hôtel non trouvé', status: 404 });
     }
@@ -179,6 +191,59 @@ exports.deleteHotel = async (req, res) => {
   }
 };
 
+// Upload d'une image pour un hôtel
+exports.uploadHotelImage = async (req, res) => {
+  try {
+    const hotelId = req.params.id;
+    // Vérifier si une image est téléchargée
+    if (!req.file) {
+      return res.status(400).json({ success: false, msg: 'Aucune image téléchargée' });
+    }
+    // Upload Image to Cloudinary
+    const data = await uploadToCloudinary(req.file.path, "f2t");
+
+    // Ajouter l'URL de l'image au tableau d'images de l'hôtel
+    const updatedHotel = await Hotel.findByIdAndUpdate(hotelId, { $push: { images: data.url } }, { new: true });
+
+    res.status(200).json({ success: true, msg: 'Image d\'hôtel téléchargée avec succès', data: updatedHotel });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ success: false, msg: 'Une erreur s\'est produite lors du téléchargement de l\'image d\'hôtel', error: error.message });
+  }
+};
+
+// Supprimer une image des images d'un hôtel
+exports.deleteHotelImage = async (req, res) => {
+  try {
+    const hotelId = req.params.id;
+    const imageId = req.params.imageId;
+
+    // Trouver l'hôtel par son ID
+    const hotel = await Hotel.findById(hotelId);
+
+    if (!hotel) {
+      return res.status(404).json({ success: false, msg: 'Hôtel non trouvé' });
+    }
+
+    // Vérifier si l'image existe dans les images de l'hôtel
+    const imageIndex = hotel.images.indexOf(imageId);
+
+    if (imageIndex === -1) {
+      return res.status(404).json({ success: false, msg: 'L\'image spécifiée n\'existe pas dans les images de l\'hôtel' });
+    }
+
+    // Supprimer l'image du tableau d'images de l'hôtel
+    hotel.images.splice(imageIndex, 1);
+    await hotel.save();
+
+    // Ajoutez ici le code pour supprimer l'image de votre service de stockage (par exemple, Cloudinary)
+
+    res.status(200).json({ success: true, msg: 'Image d\'hôtel supprimée avec succès' });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ success: false, msg: 'Une erreur s\'est produite lors de la suppression de l\'image d\'hôtel', error: error.message });
+  }
+};
 
 
 

@@ -11,9 +11,13 @@ const hotelSchema = new mongoose.Schema({
   latitude: { type: Number, required: true },
   longitude: { type: Number, required: true },
   noteebien: { type: String, required: false, maxlength: 250 },
-  pension: { type: String, maxlength: 50, enum: ['Tous Inclus', 'Pension Compléte', 'Demi-Pension', 'Petit-Déjeuner'] },
+  images: [{ type: String }],
   chambres: [{ type: Number, ref: 'Chambre' }], // la référence aux chambres
   services: [{ type: Number,  ref: 'Service'}] ,// la référence aux services
+  lpd:{type:Boolean},
+  dp:{type:Boolean},
+  ps:{type:Boolean},
+  alli:{type:Boolean}
 });
 
 const Hotel = mongoose.model('Hotel', hotelSchema);

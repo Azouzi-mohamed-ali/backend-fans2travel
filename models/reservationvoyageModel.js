@@ -9,7 +9,7 @@ const reservationVoyageSchema = new mongoose.Schema({
   prixtotal:{ type: Number, required: true},
   codevoyage: { type: mongoose.Schema.Types.ObjectId, ref: 'Voyage', required: true }, // Référence à le voyage
   nomhotel: { type: mongoose.Schema.Types.ObjectId, ref: 'Hotel', required: true }, // Référence à l'hôtel
-  cin: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true }, // Référence à l'utilisateur
+  num_ins: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true }, // Référence à l'utilisateur
   etat: { type: String, required: false, maxlength: 50, enum: ['en cours', 'hh'] },
 });
 

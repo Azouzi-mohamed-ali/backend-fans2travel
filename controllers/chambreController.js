@@ -1,6 +1,10 @@
 // controllers/chambreController.js
 const Chambre = require('../models/chambreModel');
 const Hotel = require('../models/hotelModel');
+const { cloudinary } = require('../config/cloudinary');
+// Importer multer pour gérer les fichiers
+const multer = require('multer');
+
 
  
 // getAllChambres
@@ -90,10 +94,19 @@ exports.createChambre = async (req, res) => {
 
 
 // updateChambre
+
 exports.updateChambre = async (req, res) => {
   const chambreId = req.params.id;
   try {
-    const updatedChambre = await Chambre.findByIdAndUpdate(chambreId, req.body, { new: true });
+    const updates = req.body; // Récupérer les mises à jour du corps de la requête
+
+    // Vérifier si une image est téléchargée
+    if (req.file) {
+      const data = await uploadToCloudinary(req.file.path, "f2t"); // Upload de la nouvelle image
+      updates.images = data.url; // Ajouter l'URL de la nouvelle image aux mises à jour
+    }
+
+    const updatedChambre = await Chambre.findByIdAndUpdate(chambreId, updates, { new: true });
     if (!updatedChambre) {
       return res.status(404).json({ message: 'Chambre non trouvée' });
     }
@@ -116,6 +129,7 @@ exports.updateChambre = async (req, res) => {
     res.status(400).json({ message: error.message });
   }
 };
+
 
 
 // deleteChambre
@@ -144,3 +158,54 @@ exports.deleteChambre = async (req, res) => {
 };
 
 
+// Upload d'une image pour une chambre
+exports.uploadChambreImage = async (req, res) => {
+  try {
+    // Upload Image to Cloudinary
+    const data = await uploadToCloudinary(req.file.path, "f2t");
+
+    // Save Image Url to the database
+    const savedImg = await Chambre.updateOne(
+      { _id: req.params.id },
+      { $set: { images: data.url } }
+    );
+    return res.status(404).json({ success: true, msg: ' image uploaded successfully!', status: 200});
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ success: false, msg: " image uploaded failed!", status: 500, error: error.message });
+
+  }
+};
+
+// Supprimer une image des images d'une chambre
+exports.deleteChambreImage = async (req, res) => {
+  try {
+    const chambreId = req.params.id;
+    const imageId = req.params.imageId;
+
+    // Trouver la chambre par son ID
+    const chambre = await Chambre.findById(chambreId);
+
+    if (!chambre) {
+      return res.status(404).json({ success: false, msg: 'Chambre non trouvée' });
+    }
+
+    // Vérifier si l'image existe dans les images de la chambre
+    const imageIndex = chambre.images.indexOf(imageId);
+
+    if (imageIndex === -1) {
+      return res.status(404).json({ success: false, msg: 'L\'image spécifiée n\'existe pas dans les images de la chambre' });
+    }
+
+    // Supprimer l'image du tableau d'images de la chambre
+    chambre.images.splice(imageIndex, 1);
+    await chambre.save();
+
+    // Ajoutez ici le code pour supprimer l'image de votre service de stockage (par exemple, Cloudinary)
+
+    res.status(200).json({ success: true, msg: 'Image de chambre supprimée avec succès' });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ success: false, msg: 'Une erreur s\'est produite lors de la suppression de l\'image de chambre', error: error.message });
+  }
+};

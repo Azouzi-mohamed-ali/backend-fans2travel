@@ -9,7 +9,8 @@ const chambreSchema = new mongoose.Schema({
   nbradulte: { type: Number, required: true },
   litbebe: { type: Number, required: true },
   dispo: { type: String, maxlength: 50, enum: ['Oui', 'Non'] },
-  type: { type: String, maxlength: 50, enum: ['Single', 'Double', 'Familier', 'Enfant'] }
+  type: { type: String, maxlength: 50, enum: ['Single', 'Double', 'Familier', 'Enfant'] },
+  images: [{ type: String }]
 });
 
 const Chambre = mongoose.model('Chambre', chambreSchema);

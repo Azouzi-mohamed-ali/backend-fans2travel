@@ -4,18 +4,16 @@ const mongoose = require('mongoose');
 
 const voyageSchema = new mongoose.Schema({
   codev: { type: Number, required: true, unique: true },
-  nomhotel: { type: mongoose.Schema.Types.ObjectId, ref: 'Hotel', required: true },
-  ville: { type: String, required: true, maxlength: 250 },
-  pays: { type: String, required: true, maxlength: 250 },
   ville: { type: String, maxlength: 250, required: true },
   pays: { type: String, maxlength: 250, required: true },
-  nbrjours: { type: Number, required: true },
-  nbrnuits: { type: Number, required: true },
-  datebebut: { type: Date, required: true},
-  datefin: { type: Date, required: true },
-  prix: { type: Number, required: true },
+  nbrjours: { type: Number,  },
+  nbrnuits: { type: Number,  },
+  datebebut: { type: Date, },
+  datefin: { type: Date,  },
+  prix: { type: Number, },
   noteebien: { type: String, maxlength: 250 },
-  type: { type: String, required: true, maxlength: 50, enum: ['voyage en groupe'] }
+  nomhotel: { type: String, ref: 'Hotel',required: true,  },
+
 });
 
 const Voyage = mongoose.model('Voyage', voyageSchema);

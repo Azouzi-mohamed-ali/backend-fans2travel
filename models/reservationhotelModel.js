@@ -8,7 +8,7 @@ const reservationHotelSchema = new mongoose.Schema({
   prix: { type: Number, required: true},
   prixtotal:{ type: Number, required: true},
   nomhotel: { type: mongoose.Schema.Types.ObjectId, ref: 'Hotel', required: true }, // Référence à l'hôtel
-  cin: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true }, // Référence à l'utilisateur
+  num_ins: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true }, // Référence à l'utilisateur
 });
 
 const ReservationHotel = mongoose.model('ReservationHotel', reservationHotelSchema);

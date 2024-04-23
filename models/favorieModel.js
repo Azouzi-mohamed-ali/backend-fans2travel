@@ -3,9 +3,8 @@
 const mongoose = require('mongoose');
 
 const favorieSchema = new mongoose.Schema({
-  codefav: { type: Number, required: true, unique: true },
-  cin:{ type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
-  type: { type: String, maxlength: 50, enum: ['Hotel', 'Promo', 'Voyage'] }
+  num_ins:{ type: String , ref: 'User', required: true },
+  nomhotel:{ type: String , ref: 'Hotel', required: true }
 
 });
 

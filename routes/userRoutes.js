@@ -42,7 +42,7 @@ router.get('/auth/google/callback', googleController.googleAuthCallback);
 
 // Route pour télécharger l'image de profil de l'utilisateur
 router.post('/upload-image/:id', upload.single('image'),  userController.uploadUserImage);
-
+router.delete('/upload-image/:id', userController.deleteUserImage);
 
 
 module.exports = router;

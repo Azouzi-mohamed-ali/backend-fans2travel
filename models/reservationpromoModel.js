@@ -9,7 +9,7 @@ const reservationPromoSchema = new mongoose.Schema({
   prixtotal:{ type: Number, required: true},
   codepromo: { type: mongoose.Schema.Types.ObjectId, ref: 'Promo', required: true }, // Référence à le promo
   nomhotel: { type: mongoose.Schema.Types.ObjectId, ref: 'Hotel', required: true }, // Référence à l'hôtel
-  cin: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true }, // Référence à l'utilisateur
+  num_ins: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true }, // Référence à l'utilisateur
 });
 
 const ReservationPromo = mongoose.model('ReservationPromo', reservationPromoSchema); // Correction ici

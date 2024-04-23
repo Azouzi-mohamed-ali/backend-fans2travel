@@ -1,6 +1,7 @@
 
 // controllers/voyageController.js
 const Voyage = require('../models/voyageModel');
+const Hotel = require('../models/hotelModel');
 
 // getAllVoyages
 exports.getAllVoyages = async (req, res) => {
@@ -16,7 +17,7 @@ exports.getAllVoyages = async (req, res) => {
 exports.getVoyageById = async (req, res) => {
   const voyageId = req.params.id;
   try {
-    const voyage = await Voyage.findById(voyageId);
+    const voyage = await Voyage.findById(voyageId).populate('nomhotel', 'nomhotel'); // Utiliser populate pour charger le nom de l'hôtel uniquement
     if (!voyage) {
       return res.status(404).json({ message: 'Voyage non trouvé' });
     }
@@ -26,16 +27,31 @@ exports.getVoyageById = async (req, res) => {
   }
 };
 
+
 // createVoyage
 exports.createVoyage = async (req, res) => {
-  const voyage = new Voyage(req.body);
+  const voyageData = req.body;
+  const nomHotel = voyageData.nomhotel; // Supposons que le nom de l'hôtel soit fourni dans le corps de la requête
   try {
+    // Vérifier si l'hôtel existe
+    const hotel = await Hotel.findOne({ nomhotel: nomHotel });
+    if (!hotel) {
+      return res.status(404).json({ message: 'Hôtel non trouvé' });
+    }
+
+    // Créer le voyage en associant l'hôtel par son nom
+    const voyage = new Voyage({
+      ...voyageData,
+      nomhotel: nomHotel // Utiliser le nom de l'hôtel pour l'associer au champ nomhotel du voyage
+    });
+
     const newVoyage = await voyage.save();
     res.status(201).json(newVoyage);
   } catch (error) {
     res.status(400).json({ message: error.message });
   }
 };
+
 
 // updateVoyage
 exports.updateVoyage = async (req, res) => {
